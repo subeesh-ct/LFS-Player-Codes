@@ -1,9 +1,10 @@
 <div align="center">
   <img src="https://i.ibb.co/Q7PFQn9j/ic-tv-ico.jpg" alt="LFS Player Logo" width="120" height="120">
+  
   <h1>📺 LFS Player v1.0</h1>
+  
   <p><b>High-Performance Mobile to TV Streaming Application</b></p>
   
-  <!-- Badges -->
   <a href="YOUR_YOUTUBE_VIDEO_LINK"><img src="https://img.shields.io/badge/YouTube-Coding_Theriyuma-red?style=for-the-badge&logo=youtube"></a>
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white">
   <img src="https://img.shields.io/badge/Kotlin-100%25-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white">
@@ -35,13 +36,15 @@ We have provided all the necessary files to get you started immediately:
 | :--- | :--- | :--- |
 | 📱 **Test APK** | Pre-built APK to test the app's performance. | [Download APK](https://github.com/subeesh-ct/LFS-Player-Codes/releases/download/v0.1/LFS.Player.V1.0.apk) |
 | 💻 **Source Code** | Complete Android Studio project ZIP file. | [Download ZIP](https://github.com/subeesh-ct/LFS-Player-Codes/releases/download/v0.1/LFSPlayer.zip) |
-| 📄 **Template Files** | View all the Kotlin & XML files for easy copy-pasting. | [View Project Files](https://codingtheriyuma.blogspot.com/2026/07/build-1080p-live-tv-app-lfs-player-full.html) |
+| 📄 **Template Files** | View all the Kotlin & XML files for easy copy-pasting. | [View Project Files](https://subeesh-ct.github.io/LFS-Player-Codes/) |
 
 ## 🎥 Video Tutorial
 Need help setting this up? Watch the complete step-by-step tutorial on my YouTube channel to build this app without any errors.
 [![Watch the tutorial](https://img.shields.io/badge/▶_Watch_Video_Tutorial-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](YOUR_YOUTUBE_VIDEO_LINK)
 *(Note: Replace `YOUR_YOUTUBE_VIDEO_LINK` with the actual video link once it's uploaded!)*
+<br>
 ---
+<br>
 <div align="center">
   <b>Developed with ❤️ by Subeesh</b><br>
   <i>Don't forget to star ⭐ this repository if you found it useful!</i>
