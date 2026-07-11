@@ -35,7 +35,7 @@ We have provided all the necessary files to get you started immediately:
 | :--- | :--- | :--- |
 | 📱 **Test APK** | Pre-built APK to test the app's performance. | [Download APK](https://github.com/subeesh-ct/LFS-Player-Codes/releases/download/v0.1/LFS.Player.V1.0.apk) |
 | 💻 **Source Code** | Complete Android Studio project ZIP file. | [Download ZIP](https://github.com/subeesh-ct/LFS-Player-Codes/releases/download/v0.1/LFSPlayer.zip) |
-| 📄 **Template Files** | View all the Kotlin & XML files for easy copy-pasting. | [View Project Files](https://subeesh-ct.github.io/LFS-Player-Codes/) |
+| 📄 **Template Files** | View all the Kotlin & XML files for easy copy-pasting. | [View Project Files](https://codingtheriyuma.blogspot.com/2026/07/build-1080p-live-tv-app-lfs-player-full.html) |
 
 ## 🎥 Video Tutorial
 Need help setting this up? Watch the complete step-by-step tutorial on my YouTube channel to build this app without any errors.
