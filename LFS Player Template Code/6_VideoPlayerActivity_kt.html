@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoPlayerActivity Code Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --code-bg: #0b1120;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-group input.error-border {
+            border-color: var(--error);
+        }
+
+        #errorMessage {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a5b4fc;
+            max-height: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>VideoPlayerActivity Setup</h2>
+            <p>Enter your package name to generate the VideoPlayerActivity code</p>
+        </div>
+
+        <div class="input-group">
+            <label for="packageName">Package Name</label>
+            <input type="text" id="packageName" placeholder="e.g., com.myapp.player" autocomplete="off">
+            <div id="errorMessage">Invalid package name! Format: com.example.app (lowercase, no spaces).</div>
+        </div>
+
+        <button class="btn-generate" onclick="generateCode()">Generate Kotlin Code</button>
+
+        <div class="output-container" id="outputContainer">
+            <div class="output-header">
+                <span class="output-title">VideoPlayerActivity.kt</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre><code id="codeOutput"></code></pre>
+        </div>
+    </div>
+
+    <textarea id="rawCodeTemplate" style="display:none;">
+
+package com.lfs.player.tv
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.annotation.OptIn
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.media3.common.C
+import androidx.media3.common.Format
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.ui.PlayerView
+import com.lfs.player.R
+import kotlinx.coroutines.*
+import java.net.HttpURLConnection
+import java.net.URI
+import java.net.URL
+import java.util.Locale
+
+@OptIn(UnstableApi::class)
+class VideoPlayerActivity : AppCompatActivity() {
+
+    companion object {
+        const val ACTION_STOP_VIDEO = "com.lfs.player.tv.ACTION_STOP_VIDEO"
+        private const val TAG = "VideoPlayerActivity"
+    }
+
+    private var player: ExoPlayer? = null
+    private lateinit var playerView: PlayerView
+    private lateinit var loadingProgress: ProgressBar
+    private var videoUrl: String? = null
+
+    // வார்னிங் ஒரு முறை மட்டுமே வர இந்த வேரியபிள்
+    private var qualityWarningShown = false
+
+    private val stopReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            finish()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_video_player)
+
+        playerView = findViewById(R.id.playerView)
+        loadingProgress = findViewById(R.id.loadingProgress)
+
+        // 3 விநாடிகளில் தானாக மறைய
+        playerView.controllerShowTimeoutMs = 3000
+
+        videoUrl = intent.getStringExtra("VIDEO_URL")
+        if (videoUrl.isNullOrEmpty()) {
+            Toast.makeText(this, "No video URL provided", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        initializePlayer()
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(stopReceiver, IntentFilter(ACTION_STOP_VIDEO))
+
+        playerView.isFocusable = true
+        playerView.isFocusableInTouchMode = true
+        playerView.requestFocus()
+
+        // Focus Reset
+        playerView.setControllerVisibilityListener(
+            PlayerView.ControllerVisibilityListener { visibility ->
+                if (visibility == View.VISIBLE) {
+                    findViewById<View>(R.id.exo_play_pause)?.requestFocus()
+                }
+            }
+        )
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showStopConfirmationDialog()
+            }
+        })
+    }
+
+    private fun showStopConfirmationDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Stop Video")
+            .setMessage("Are you sure you want to exit and stop the video?")
+            .setPositiveButton("Yes") { _, _ ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    sendStopToMobileWithTimeout()
+                    withContext(Dispatchers.Main) {
+                        finish()
+                    }
+                }
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private suspend fun sendStopToMobileWithTimeout() {
+        videoUrl?.let { url ->
+            val mobileIp = try {
+                URI(url).host
+            } catch (e: Exception) { null }
+
+            if (mobileIp != null) {
+                try {
+                    val stopUrl = URL("http://$mobileIp:8081/stop")
+                    withContext(Dispatchers.IO) {
+                        withTimeout(2000L) {
+                            (stopUrl.openConnection() as HttpURLConnection).apply {
+                                connectTimeout = 2000
+                                requestMethod = "GET"
+                                responseCode
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Could not send /stop to mobile", e)
+                }
+            }
+        }
+    }
+
+    private fun initializePlayer() {
+        // டிவியின் எல்லா கோடெக்-கையும் கட்டாயப்படுத்தி பிளே பண்ண வைக்கும் செட்டிங்ஸ்
+        val renderersFactory = DefaultRenderersFactory(this).apply {
+            setEnableDecoderFallback(true)
+            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+        }
+
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setConnectTimeoutMs(30_000)
+            .setReadTimeoutMs(30_000)
+            .setAllowCrossProtocolRedirects(true)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(httpDataSourceFactory)
+
+        // பஃபர் மற்றும் ஸ்பீடு ஆப்டிமைசேஷன் (வீடியோ பட்டாசு மாதிரி உடனே தொடங்க)
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                32_000, // Min Buffer
+                64_000, // Max Buffer
+                1_500,  // Playback Start Buffer (1.5 seconds) - வேகமாக தொடங்க
+                2_000   // Rebuffer Delay
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
+        player = ExoPlayer.Builder(this, renderersFactory)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .setLoadControl(loadControl)
+            .build()
+
+        playerView.player = player
+
+        player?.addListener(object : Player.Listener {
+
+            // ஸ்மார்ட் குவாலிட்டி செக்கர்: வீடியோ ட்ராக் மாறியவுடன் ஹார்டுவேர் திறனை கணக்கிட
+            override fun onTracksChanged(tracks: Tracks) {
+                if (qualityWarningShown) return
+
+                for (group in tracks.groups) {
+                    if (group.type == C.TRACK_TYPE_VIDEO && group.isSelected) {
+                        val format = group.getTrackFormat(0)
+
+                        // 4K Resolution அல்லது 15 Mbps-க்கு மேல் Bitrate இருக்கிறதா என செக் செய்கிறது
+                        val is4K = format.width >= 3840 || format.height >= 2160
+                        val isHighBitrate = format.bitrate > 15_000_000 // 15 Mbps
+                        val isHEVC = format.sampleMimeType?.contains("hevc") == true || format.codecs?.contains("hvc") == true
+
+                        if (is4K || (isHEVC && isHighBitrate) || isHighBitrate) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@VideoPlayerActivity,
+                                    "High-Quality video detected. TV might lag depending on hardware capacity.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                qualityWarningShown = true
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                loadingProgress.visibility = when (playbackState) {
+                    Player.STATE_BUFFERING -> View.VISIBLE
+                    else -> View.GONE
+                }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                val errorMsg = "Player error: ${error.errorCodeName} - ${error.message}"
+
+                // எரர் என்னன்னு கண்டுபிடிக்கிற லாஜிக்
+                val reason = when (error.errorCode) {
+                    PlaybackException.ERROR_CODE_DECODER_INIT_FAILED -> "Hardware cannot support this video resolution/format."
+                    PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED -> "Video codec not supported by this TV."
+                    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED, PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> "Network connection is too slow or disconnected."
+                    else -> error.message ?: "Unknown error"
+                }
+
+                runOnUiThread {
+                    Toast.makeText(this@VideoPlayerActivity, errorMsg, Toast.LENGTH_LONG).show()
+
+                    // தெளிவான எரர் காட்டும் டயலாக் பாக்ஸ்
+                    AlertDialog.Builder(this@VideoPlayerActivity)
+                        .setTitle("Cannot Play Video")
+                        .setMessage("Sorry, this video file cannot be played on your TV.\n\nReason: $reason\nError Code: ${error.errorCodeName}")
+                        .setPositiveButton("Stop Server") { _, _ ->
+                            CoroutineScope(Dispatchers.IO).launch {
+                                sendStopToMobileWithTimeout()
+                                withContext(Dispatchers.Main) {
+                                    finish()
+                                }
+                            }
+                        }
+                        .setCancelable(false)
+                        .show()
+                }
+                Log.e(TAG, errorMsg, error)
+            }
+        })
+
+        val mediaItem = MediaItem.fromUri(videoUrl!!)
+        player?.setMediaItem(mediaItem)
+        player?.prepare()
+        player?.play()
+
+        setupCustomButtons()
+    }
+
+    private fun setupCustomButtons() {
+        findViewById<View>(R.id.custom_audio_track)?.setOnClickListener {
+            showAudioTrackDialog()
+        }
+        findViewById<View>(R.id.custom_subtitle)?.setOnClickListener {
+            showSubtitleDialog()
+        }
+    }
+
+    private fun getLanguageName(format: Format): String {
+        val langCode = format.language
+        val langName = if (!langCode.isNullOrEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Locale.Builder().setLanguage(langCode).build().displayLanguage
+            } else {
+                @Suppress("DEPRECATION")
+                Locale(langCode).displayLanguage
+            }
+        } else {
+            "Unknown"
+        }
+        val label = format.label
+        return if (!label.isNullOrEmpty()) {
+            "$langName ($label)"
+        } else {
+            langName
+        }
+    }
+
+    private fun showAudioTrackDialog() {
+        val player = this.player ?: return
+        val tracks: Tracks = player.currentTracks
+
+        data class AudioTrackInfo(val groupIndex: Int, val trackIndex: Int, val format: Format)
+        val audioList = mutableListOf<AudioTrackInfo>()
+
+        for (i in 0 until tracks.groups.size) {
+            val group = tracks.groups[i]
+            if (group.type == C.TRACK_TYPE_AUDIO) {
+                for (j in 0 until group.length) {
+                    val format = group.getTrackFormat(j)
+                    audioList.add(AudioTrackInfo(i, j, format))
+                }
+            }
+        }
+
+        if (audioList.isEmpty()) {
+            Toast.makeText(this, "No audio tracks available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val trackNames = audioList.mapIndexed { index, info ->
+            "Track ${index + 1}: ${getLanguageName(info.format)}"
+        }.toTypedArray()
+
+        val selectedIndex = audioList.indexOfFirst { info ->
+            val group = tracks.groups[info.groupIndex]
+            group.isTrackSelected(info.trackIndex)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Audio Track")
+            .setSingleChoiceItems(trackNames, selectedIndex) { dialog, which ->
+                val info = audioList[which]
+                val group = tracks.groups[info.groupIndex]
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setOverrideForType(
+                        TrackSelectionOverride(group.mediaTrackGroup, listOf(info.trackIndex))
+                    )
+                    .build()
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showSubtitleDialog() {
+        val player = this.player ?: return
+        val tracks: Tracks = player.currentTracks
+
+        data class SubtitleTrackInfo(val groupIndex: Int, val trackIndex: Int, val format: Format)
+        val subtitleList = mutableListOf<SubtitleTrackInfo>()
+
+        for (i in 0 until tracks.groups.size) {
+            val group = tracks.groups[i]
+            if (group.type == C.TRACK_TYPE_TEXT) {
+                for (j in 0 until group.length) {
+                    val format = group.getTrackFormat(j)
+                    subtitleList.add(SubtitleTrackInfo(i, j, format))
+                }
+            }
+        }
+
+        val items = mutableListOf("Off")
+        items.addAll(subtitleList.mapIndexed { index, info ->
+            "Subtitle ${index + 1}: ${getLanguageName(info.format)}"
+        })
+
+        val selectedInfo = subtitleList.firstOrNull { info ->
+            val group = tracks.groups[info.groupIndex]
+            group.isTrackSelected(info.trackIndex)
+        }
+
+        // மஞ்சள் நிற 'If-Null' வார்னிங் வராமல் இருக்க அப்டேட் செய்யப்பட்ட கோடு
+        val selectedIndex = selectedInfo?.let { subtitleList.indexOf(it) + 1 } ?: 0
+
+        AlertDialog.Builder(this)
+            .setTitle("Select Subtitle")
+            .setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
+                if (which == 0) {
+                    player.trackSelectionParameters = player.trackSelectionParameters
+                        .buildUpon()
+                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                        .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                        .build()
+                } else {
+                    val info = subtitleList[which - 1]
+                    val group = tracks.groups[info.groupIndex]
+                    player.trackSelectionParameters = player.trackSelectionParameters
+                        .buildUpon()
+                        .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                        .setOverrideForType(
+                            TrackSelectionOverride(group.mediaTrackGroup, listOf(info.trackIndex))
+                        )
+                        .build()
+                }
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        player?.pause()
+    }
+
+    override fun onDestroy() {
+        player?.release()
+        player = null
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(stopReceiver)
+        super.onDestroy()
+    }
+}
+
+    </textarea>
+
+    <script>
+        document.getElementById('packageName').addEventListener('input', clearError);
+
+        function clearError() {
+            document.getElementById('packageName').classList.remove('error-border');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('outputContainer').style.display = 'none';
+        }
+
+        function isValidPackageName(packageName) {
+            const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+            return packageRegex.test(packageName.toLowerCase());
+        }
+
+        function generateCode() {
+            let packageName = document.getElementById('packageName').value.trim();
+            let packageInput = document.getElementById('packageName');
+            let errorMsg = document.getElementById('errorMessage');
+
+            if(!packageName) {
+                alert("Please fill in the Package Name!");
+                return;
+            }
+
+            if(!isValidPackageName(packageName)) {
+                packageInput.classList.add('error-border');
+                errorMsg.style.display = 'block';
+                document.getElementById('outputContainer').style.display = 'none';
+                return; 
+            }
+
+            packageName = packageName.toLowerCase();
+
+            // Get the raw Kotlin code from the hidden textarea
+            let baseKotlin = document.getElementById('rawCodeTemplate').value;
+
+            // Dynamic Replacement Logic - Replace Package Name
+            let finalCode = baseKotlin
+                .replace(/com\.lfs\.player/g, packageName);
+
+            document.getElementById('codeOutput').textContent = finalCode.trim();
+            document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('copyBtn').textContent = 'Copy Code';
+        }
+
+        function copyCode() {
+            let code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                let btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy Code';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.color = 'var(--primary)';
+                }, 2500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy code. Please try manually.");
+            });
+        }
+    </script>
+</body>
+</html>

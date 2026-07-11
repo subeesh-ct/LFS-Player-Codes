@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>settings.gradle Code Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --code-bg: #0b1120;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a5b4fc;
+            max-height: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>settings.gradle Setup</h2>
+            <p>Enter your App Name to configure the root project name</p>
+        </div>
+
+        <div class="input-group">
+            <label for="appName">App Name</label>
+            <input type="text" id="appName" placeholder="e.g., Video Player Pro" autocomplete="off">
+        </div>
+
+        <button class="btn-generate" onclick="generateCode()">Generate Code</button>
+
+        <div class="output-container" id="outputContainer">
+            <div class="output-header">
+                <span class="output-title">settings.gradle</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre><code id="codeOutput"></code></pre>
+        </div>
+    </div>
+
+    <textarea id="rawCodeTemplate" style="display:none;">
+
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "LFS Player"
+include(":app")
+
+    </textarea>
+
+    <script>
+        function generateCode() {
+            let appName = document.getElementById('appName').value.trim();
+
+            if(!appName) {
+                alert("Please fill in the App Name!");
+                return;
+            }
+
+            // Get the raw code from the hidden textarea
+            let baseGradle = document.getElementById('rawCodeTemplate').value;
+
+            // Replace the rootProject.name dynamically
+            let finalCode = baseGradle.replace(/rootProject\.name = "LFS Player"/g, 'rootProject.name = "' + appName + '"');
+
+            document.getElementById('codeOutput').textContent = finalCode.trim();
+            document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('copyBtn').textContent = 'Copy Code';
+        }
+
+        function copyCode() {
+            let code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                let btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy Code';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.color = 'var(--primary)';
+                }, 2500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy code. Please try manually.");
+            });
+        }
+    </script>
+</body>
+</html>

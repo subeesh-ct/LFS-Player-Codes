@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>build.gradle.kts Code Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --code-bg: #0b1120;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-group input.error-border {
+            border-color: var(--error);
+        }
+
+        #errorMessage {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a5b4fc;
+            max-height: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>build.gradle.kts Setup</h2>
+            <p>Enter your package name to configure the Gradle build file</p>
+        </div>
+
+        <div class="input-group">
+            <label for="packageName">Package Name</label>
+            <input type="text" id="packageName" placeholder="e.g., com.myapp.player" autocomplete="off">
+            <div id="errorMessage">Invalid package name! Format: com.example.app (lowercase, no spaces).</div>
+        </div>
+
+        <button class="btn-generate" onclick="generateCode()">Generate Gradle Code</button>
+
+        <div class="output-container" id="outputContainer">
+            <div class="output-header">
+                <span class="output-title">build.gradle.kts</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre><code id="codeOutput"></code></pre>
+        </div>
+    </div>
+
+    <textarea id="rawCodeTemplate" style="display:none;">
+
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.lfs.player"
+    compileSdk = 36
+
+    defaultConfig {
+        applicationId = "com.lfs.player"
+        minSdk = 23
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("debug") {
+            isMinifyEnabled = false
+        }
+    }
+}
+
+dependencies {
+    // Stable versions
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.activity:activity-ktx:1.8.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Networking
+    implementation("org.nanohttpd:nanohttpd:2.3.1")
+
+    // ExoPlayer (Media3)
+    implementation("androidx.media3:media3-exoplayer:1.4.1")
+    implementation("androidx.media3:media3-ui:1.4.1")
+    implementation("androidx.media3:media3-common:1.4.1")
+
+    // Leanback
+    implementation("androidx.leanback:leanback:1.0.0")
+}
+
+    </textarea>
+
+    <script>
+        document.getElementById('packageName').addEventListener('input', clearError);
+
+        function clearError() {
+            document.getElementById('packageName').classList.remove('error-border');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('outputContainer').style.display = 'none';
+        }
+
+        function isValidPackageName(packageName) {
+            const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+            return packageRegex.test(packageName.toLowerCase());
+        }
+
+        function generateCode() {
+            let packageName = document.getElementById('packageName').value.trim();
+            let packageInput = document.getElementById('packageName');
+            let errorMsg = document.getElementById('errorMessage');
+
+            if(!packageName) {
+                alert("Please fill in the Package Name!");
+                return;
+            }
+
+            if(!isValidPackageName(packageName)) {
+                packageInput.classList.add('error-border');
+                errorMsg.style.display = 'block';
+                document.getElementById('outputContainer').style.display = 'none';
+                return; 
+            }
+
+            packageName = packageName.toLowerCase();
+
+            let baseGradle = document.getElementById('rawCodeTemplate').value;
+
+            // Replace both namespace and applicationId matches globally
+            let finalCode = baseGradle.replace(/com\.lfs\.player/g, packageName);
+
+            document.getElementById('codeOutput').textContent = finalCode.trim();
+            document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('copyBtn').textContent = 'Copy Code';
+        }
+
+        function copyCode() {
+            let code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                let btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy Code';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.color = 'var(--primary)';
+                }, 2500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy code. Please try manually.");
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MainActivity Code Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --code-bg: #0b1120;
+            --section-bg: #162032;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: #a5b4fc;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-group input.error-border {
+            border-color: var(--error);
+        }
+
+        #errorMessage {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+            grid-column: span 2;
+        }
+
+        .menu-box {
+            background-color: var(--section-bg);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .menu-box-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a5b4fc;
+            max-height: 400px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>MainActivity Setup</h2>
+            <p>Customize your app details and menu links below</p>
+        </div>
+
+        <div class="section-title">App Details</div>
+        <div class="grid-2">
+            <div class="input-group">
+                <label for="appName">App Name</label>
+                <input type="text" id="appName" placeholder="e.g., Video Player Pro" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label for="packageName">Package Name</label>
+                <input type="text" id="packageName" placeholder="e.g., com.videoplayer.pro" autocomplete="off">
+            </div>
+            <div id="errorMessage">Invalid package name! Format: com.myapp (lowercase, no spaces).</div>
+        </div>
+
+        <div class="section-title">Top Right Menu Links</div>
+        
+        <div class="menu-box">
+            <div class="menu-box-title">Menu Item 1</div>
+            <div class="grid-2">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Button Name</label>
+                    <input type="text" id="menu1Title" value="Social Media">
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>URL Link</label>
+                    <input type="url" id="menu1Url" value="https://www.instagram.com/subeesh.zero/">
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-box">
+            <div class="menu-box-title">Menu Item 2</div>
+            <div class="grid-2">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Button Name</label>
+                    <input type="text" id="menu2Title" value="Developer Info">
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>URL Link</label>
+                    <input type="url" id="menu2Url" value="https://subeesh-zero.github.io/Profile/">
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-box">
+            <div class="menu-box-title">Menu Item 3</div>
+            <div class="grid-2">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Button Name</label>
+                    <input type="text" id="menu3Title" value="Donate to Developer">
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>URL Link</label>
+                    <input type="url" id="menu3Url" value="https://i.ibb.co/m55Qv3fg/24c48749e3afba4d62f323bbd3679830-1.jpg">
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-generate" onclick="generateCode()">Generate MainActivity Code</button>
+
+        <div class="output-container" id="outputContainer">
+            <div class="output-header">
+                <span class="output-title">MainActivity.kt</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre><code id="codeOutput"></code></pre>
+        </div>
+    </div>
+
+    <textarea id="rawCodeTemplate" style="display:none;">
+
+package com.lfs.player
+
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.media.MediaMetadataRetriever
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
+import com.google.android.material.chip.Chip
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import com.lfs.player.service.FileServerService
+import com.lfs.player.service.ServerEventBus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var layoutIpInput: LinearLayout
+    private lateinit var layoutRemote: LinearLayout
+    private lateinit var ipInputLayout: TextInputLayout
+    private lateinit var ipInput: TextInputEditText
+    private lateinit var btnConnect: MaterialButton
+
+    private lateinit var tvStatus: Chip
+    private lateinit var btnSelectFile: MaterialButton
+    private lateinit var btnPlayVideo: MaterialButton
+    private lateinit var layoutPlayingState: MaterialCardView
+    private lateinit var btnStopVideo: MaterialButton
+
+    private var tvIpAddress: String = ""
+    private var streaming = false
+    private var lastSelectedUri: Uri? = null
+
+    private var backPressedTime: Long = 0
+
+    private val requestStoragePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            openFilePicker()
+        } else {
+            Toast.makeText(this, "Permission Required to select movies!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val uri = lastSelectedUri ?: return@registerForActivityResult
+            startStreamingInternal(uri)
+        } else {
+            Toast.makeText(this, "Notification permission required", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private val pickVideoLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            lastSelectedUri = uri
+            btnSelectFile.text = "CHANGE MOVIE"
+            btnPlayVideo.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // --- 3-dot menu logic ---
+        val menuButton = findViewById<TextView>(R.id.menuButton)
+        menuButton?.setOnClickListener { view ->
+            showMenu(view)
+        }
+
+        requestBatteryOptimizationExemption()
+
+        layoutIpInput = findViewById(R.id.layoutIpInput)
+        layoutRemote = findViewById(R.id.layoutRemote)
+        ipInputLayout = findViewById(R.id.ipInputLayout)
+        ipInput = findViewById(R.id.ipAddressInput)
+        btnConnect = findViewById(R.id.btnConnect)
+
+        tvStatus = findViewById(R.id.tvStatus)
+        btnSelectFile = findViewById(R.id.btnSelectFile)
+        btnPlayVideo = findViewById(R.id.btnPlayVideo)
+        layoutPlayingState = findViewById(R.id.layoutPlayingState)
+        btnStopVideo = findViewById(R.id.btnStopVideo)
+
+        val prefs = getSharedPreferences("LFSPLAYER_PREFS", Context.MODE_PRIVATE)
+        val savedIp = prefs.getString("LAST_IP", "")
+        if (!savedIp.isNullOrEmpty()) {
+            ipInput.setText(savedIp)
+            ipInput.setSelection(savedIp.length)
+            checkIpValidity(savedIp)
+        }
+
+        ipInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                ipInputLayout.error = null
+                checkIpValidity(s.toString().trim())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        btnConnect.setOnClickListener { view ->
+            val ip = ipInput.text.toString().trim()
+            if (isValidLocalIp(ip)) {
+                val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                verifyTvConnection(ip)
+            } else {
+                ipInputLayout.error = "Invalid IP Address"
+            }
+        }
+
+        btnSelectFile.setOnClickListener {
+            checkAndRequestStoragePermission()
+        }
+
+        btnPlayVideo.setOnClickListener {
+            lastSelectedUri?.let { uri ->
+                checkResolutionAndPlay(uri)
+            }
+        }
+
+        btnStopVideo.setOnClickListener {
+            stopStreamingAndNotifyTV()
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (streaming) {
+                    showExitDialog()
+                } else if (layoutRemote.visibility == View.VISIBLE) {
+                    showIpInput(true)
+                } else {
+                    if (backPressedTime + 2000 > System.currentTimeMillis()) {
+                        finish()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Press back again to exit", Toast.LENGTH_SHORT).show()
+                    }
+                    backPressedTime = System.currentTimeMillis()
+                }
+            }
+        })
+
+        setupNetworkCallback()
+
+        lifecycleScope.launch {
+            ServerEventBus.serverEvents.collect { event ->
+                if (event == FileServerService.ACTION_RESET_REMOTE_UI) {
+                    resetRemoteUiState()
+                    Toast.makeText(this@MainActivity, "Server / Video Stopped", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun setupNetworkCallback() {
+        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+
+        connectivityManager.registerNetworkCallback(networkRequest, object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+                runOnUiThread {
+                    val prefs = getSharedPreferences("LFSPLAYER_PREFS", Context.MODE_PRIVATE)
+                    val savedIp = prefs.getString("LAST_IP", "")
+                    if (ipInput.text.isNullOrEmpty() && !savedIp.isNullOrEmpty()) {
+                        ipInput.setText(savedIp)
+                        ipInput.setSelection(savedIp.length)
+                        checkIpValidity(savedIp)
+                    }
+                }
+            }
+        })
+    }
+
+    private fun verifyTvConnection(ip: String) {
+        btnConnect.isEnabled = false
+        btnConnect.text = "CONNECTING..."
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val isReachable = try {
+                val url = URL("http://$ip:8081/")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = 3000
+                conn.readTimeout = 3000
+                conn.responseCode == 200
+            } catch (e: Exception) {
+                false
+            }
+
+            withContext(Dispatchers.Main) {
+                if (isReachable) {
+                    ipInputLayout.error = null
+                    tvIpAddress = ip
+                    getSharedPreferences("LFSPLAYER_PREFS", Context.MODE_PRIVATE).edit().putString("LAST_IP", ip).apply()
+                    btnConnect.text = "CONNECT"
+                    showIpInput(false)
+                } else {
+                    ipInputLayout.error = "TV not reachable! Check Wi-Fi & TV App."
+                    btnConnect.text = "CONNECT"
+                    checkIpValidity(ip)
+                }
+            }
+        }
+    }
+
+    private fun checkResolutionAndPlay(videoUri: Uri) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            var isHighQuality = false
+            try {
+                val retriever = MediaMetadataRetriever()
+                retriever.setDataSource(this@MainActivity, videoUri)
+
+                // Resolution checking
+                val width = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull() ?: 0
+                val height = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull() ?: 0
+
+                // Bitrate checking (check if above 15 Mbps)
+                val bitrate = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)?.toLongOrNull() ?: 0L
+
+                retriever.release()
+
+                // Show warning if it's 4K or if bitrate is above 15 Mbps.
+                if (width > 1920 || height > 1080 || bitrate > 15_000_000L) {
+                    isHighQuality = true
+                }
+            } catch (e: Exception) {
+            }
+
+            withContext(Dispatchers.Main) {
+                if (isHighQuality) {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("High Quality Video Detected")
+                        .setMessage("This is a High-resolution or High-bitrate video.\nIt may or may not play smoothly, depending on your TV's hardware capacity.")
+                        .setPositiveButton("CONTINUE TO PLAY") { _, _ -> startStreaming(videoUri) }
+                        .setNegativeButton("CANCEL", null)
+                        .show()
+                } else {
+                    startStreaming(videoUri)
+                }
+            }
+        }
+    }
+
+    private fun requestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val packageName = packageName
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (FileServerService.isRunning) {
+            showIpInput(false)
+            streaming = true
+            tvIpAddress = FileServerService.currentTvIp ?: ""
+            showPlayingState()
+        }
+    }
+
+    private fun checkAndRequestStoragePermission() {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_VIDEO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) {
+            openFilePicker()
+        } else {
+            requestStoragePermissionLauncher.launch(permission)
+        }
+    }
+
+    private fun isValidLocalIp(ip: String): Boolean {
+        val pattern = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$".toRegex()
+        return ip.matches(pattern) && (ip.startsWith("192.168.") || ip.startsWith("172.") || ip.startsWith("10."))
+    }
+
+    private fun checkIpValidity(ip: String) {
+        val isValid = isValidLocalIp(ip)
+        btnConnect.isEnabled = isValid
+        btnConnect.backgroundTintList = ColorStateList.valueOf(
+            if (isValid) Color.parseColor("#1A73E8") else Color.parseColor("#9E9E9E")
+        )
+    }
+
+    private fun openFilePicker() {
+        pickVideoLauncher.launch(arrayOf("video/*"))
+    }
+
+    private fun startStreaming(videoUri: Uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                lastSelectedUri = videoUri
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                return
+            }
+        }
+        startStreamingInternal(videoUri)
+    }
+
+    private fun startStreamingInternal(videoUri: Uri) {
+        streaming = true
+        showPlayingState()
+
+        val serviceIntent = Intent(this, FileServerService::class.java).apply {
+            putExtra("TV_IP", tvIpAddress)
+            putExtra("VIDEO_URI", videoUri.toString())
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
+    private fun stopStreamingAndNotifyTV() {
+        val stopIntent = Intent(this, FileServerService::class.java).apply {
+            action = FileServerService.ACTION_STOP_SERVER
+        }
+        startService(stopIntent)
+        resetRemoteUiState()
+    }
+
+    private fun resetRemoteUiState() {
+        streaming = false
+        layoutPlayingState.visibility = View.GONE
+        btnSelectFile.visibility = View.VISIBLE
+        btnSelectFile.text = "SELECT MOVIE"
+        btnPlayVideo.visibility = View.GONE
+    }
+
+    private fun showIpInput(show: Boolean) {
+        layoutIpInput.visibility = if (show) View.VISIBLE else View.GONE
+        layoutRemote.visibility = if (show) View.GONE else View.VISIBLE
+        if (!show && !streaming) {
+            resetRemoteUiState()
+        }
+        if (show) {
+            ipInputLayout.error = null
+            checkIpValidity(ipInput.text.toString().trim())
+        }
+    }
+
+    private fun showPlayingState() {
+        btnSelectFile.visibility = View.GONE
+        btnPlayVideo.visibility = View.GONE
+        layoutPlayingState.visibility = View.VISIBLE
+    }
+
+    private fun showExitDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Stop Video")
+            .setMessage("Do you want to stop the video and return to file selection?")
+            .setPositiveButton("Yes") { _, _ ->
+                stopStreamingAndNotifyTV()
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun openUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Browser not found!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showMenu(v: View) {
+        val contextWrapper = android.view.ContextThemeWrapper(this, androidx.appcompat.R.style.Theme_AppCompat_Light)
+        val popup = PopupMenu(contextWrapper, v)
+
+        popup.menu.add("Social Media")
+        popup.menu.add("Developer Info")
+        popup.menu.add("Donate to Developer")
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.title) {
+                "Social Media" -> openUrl("https://www.instagram.com/subeesh.zero/")
+                "Developer Info" -> openUrl("https://subeesh-zero.github.io/Profile/")
+                "Donate to Developer" -> openUrl("https://i.ibb.co/m55Qv3fg/24c48749e3afba4d62f323bbd3679830-1.jpg")
+            }
+            true
+        }
+        popup.show()
+    }
+}
+
+    </textarea>
+
+    <script>
+        document.getElementById('appName').addEventListener('input', function(e) {
+            let name = e.target.value.toLowerCase().trim();
+            let formattedName = name.replace(/[^a-z0-9]/g, '');
+            
+            let packageInput = document.getElementById('packageName');
+            if(formattedName.length > 0) {
+                if(/^[0-9]/.test(formattedName)) {
+                    formattedName = 'app' + formattedName;
+                }
+                packageInput.value = 'com.' + formattedName + '.app';
+            } else {
+                packageInput.value = '';
+            }
+            clearError();
+        });
+
+        document.getElementById('packageName').addEventListener('input', clearError);
+
+        function clearError() {
+            document.getElementById('packageName').classList.remove('error-border');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('outputContainer').style.display = 'none';
+        }
+
+        function isValidPackageName(packageName) {
+            const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+            return packageRegex.test(packageName.toLowerCase());
+        }
+
+        function generateCode() {
+            let appName = document.getElementById('appName').value.trim();
+            let packageName = document.getElementById('packageName').value.trim();
+            let packageInput = document.getElementById('packageName');
+            let errorMsg = document.getElementById('errorMessage');
+
+            // Menu Inputs
+            let m1Title = document.getElementById('menu1Title').value.trim();
+            let m1Url = document.getElementById('menu1Url').value.trim();
+            let m2Title = document.getElementById('menu2Title').value.trim();
+            let m2Url = document.getElementById('menu2Url').value.trim();
+            let m3Title = document.getElementById('menu3Title').value.trim();
+            let m3Url = document.getElementById('menu3Url').value.trim();
+
+            if(!appName || !packageName) {
+                alert("Please fill in both App Name and Package Name!");
+                return;
+            }
+
+            if(!isValidPackageName(packageName)) {
+                packageInput.classList.add('error-border');
+                errorMsg.style.display = 'block';
+                document.getElementById('outputContainer').style.display = 'none';
+                return; 
+            }
+
+            packageName = packageName.toLowerCase();
+            let cleanAppPrefix = appName.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if(cleanAppPrefix === '') cleanAppPrefix = 'APP';
+
+            // Get raw code
+            let baseKotlin = document.getElementById('rawCodeTemplate').value;
+
+            // Replacements
+            let finalCode = baseKotlin
+                // 1. Replace Package Name
+                .replace(/com\.lfs\.player/g, packageName)
+                // 2. Replace Shared Prefs key
+                .replace(/LFS_PREFS/g, cleanAppPrefix + '_PREFS')
+                // 3. Replace Menu 1
+                .replace(/"Social Media"/g, '"' + m1Title + '"')
+                .replace(/"https:\/\/www\.instagram\.com\/subeesh\.zero\/"/g, '"' + m1Url + '"')
+                // 4. Replace Menu 2
+                .replace(/"Developer Info"/g, '"' + m2Title + '"')
+                .replace(/"https:\/\/subeesh-zero\.github\.io\/Profile\/"/g, '"' + m2Url + '"')
+                // 5. Replace Menu 3
+                .replace(/"Donate to Developer"/g, '"' + m3Title + '"')
+                .replace(/"https:\/\/i\.ibb\.co\/m55Qv3fg\/24c48749e3afba4d62f323bbd3679830-1\.jpg"/g, '"' + m3Url + '"');
+
+            document.getElementById('codeOutput').textContent = finalCode.trim();
+            document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('copyBtn').textContent = 'Copy Code';
+        }
+
+        function copyCode() {
+            let code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                let btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy Code';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.color = 'var(--primary)';
+                }, 2500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy code. Please try manually.");
+            });
+        }
+    </script>
+</body>
+</html>

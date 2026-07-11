@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kotlin Service Code Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --code-bg: #0b1120;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-group input.error-border {
+            border-color: var(--error);
+        }
+
+        #errorMessage {
+            color: var(--error);
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .output-container {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1e293b;
+            padding: 10px 15px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .output-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .btn-copy {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a5b4fc;
+            max-height: 500px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h2>File Server Setup</h2>
+            <p>Enter your application details to generate the FileServerService code</p>
+        </div>
+
+        <div class="input-group">
+            <label for="appName">App Name</label>
+            <input type="text" id="appName" placeholder="e.g., Video Player Pro" autocomplete="off">
+        </div>
+
+        <div class="input-group">
+            <label for="packageName">Package Name</label>
+            <input type="text" id="packageName" placeholder="e.g., com.videoplayer.pro" autocomplete="off">
+            <div id="errorMessage">Invalid package name! It must contain at least one dot, use only lowercase letters/numbers, and start with a letter.</div>
+        </div>
+
+        <button class="btn-generate" onclick="generateCode()">Generate Kotlin Code</button>
+
+        <div class="output-container" id="outputContainer">
+            <div class="output-header">
+                <span class="output-title">FileServerService.kt</span>
+                <button class="btn-copy" id="copyBtn" onclick="copyCode()">Copy Code</button>
+            </div>
+            <pre><code id="codeOutput"></code></pre>
+        </div>
+    </div>
+
+    <textarea id="rawCodeTemplate" style="display:none;">
+
+package com.lfs.player.service
+
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
+import android.os.PowerManager
+import android.provider.MediaStore
+import android.util.Log
+import android.webkit.MimeTypeMap
+import androidx.core.app.NotificationCompat
+import androidx.core.graphics.toColorInt
+import com.lfs.player.MainActivity
+import com.lfs.player.R
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import java.io.*
+import java.net.HttpURLConnection
+import java.net.URL
+
+// --- SharedFlow Event Bus (LocalBroadcastManager-க்கு மாற்று) ---
+object ServerEventBus {
+    private val _serverEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val serverEvents = _serverEvents.asSharedFlow()
+
+    fun postEvent(event: String) {
+        _serverEvents.tryEmit(event)
+    }
+}
+// --------------------------------------------------------------------
+
+class FileServerService : Service() {
+
+    companion object {
+        const val TAG = "FileServerService"
+        const val ACTION_STOP_SERVER = "com.lfs.player.action.STOP_SERVER"
+        const val ACTION_RESET_REMOTE_UI = "com.lfs.player.action.RESET_REMOTE_UI"
+        const val EXTRA_TV_IP = "TV_IP"
+        const val EXTRA_VIDEO_URI = "VIDEO_URI"
+
+        @Volatile
+        var isRunning = false
+
+        @Volatile
+        var currentTvIp: String? = null
+    }
+
+    private var server: VideoStreamServer? = null
+    private var tvIp: String? = null
+    private var videoUri: Uri? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private var wakeLock: PowerManager.WakeLock? = null
+    private var wifiLock: WifiManager.WifiLock? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        createNotificationChannel()
+
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LFSServer::StreamingWakeLock")
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "LFSServer::StreamingWifiLock")
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_STOP_SERVER) {
+            stopStreaming()
+            return START_NOT_STICKY
+        }
+
+        wakeLock?.acquire(10 * 60 * 60 * 1000L)
+        wifiLock?.acquire()
+
+        tvIp = intent?.getStringExtra(EXTRA_TV_IP)
+        currentTvIp = tvIp
+
+        videoUri = intent?.getStringExtra(EXTRA_VIDEO_URI)?.let { Uri.parse(it) }
+
+        if (tvIp == null || videoUri == null) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        if (server == null) {
+            try {
+                server = VideoStreamServer(8081)
+                server?.start()
+                Log.d(TAG, "Server started on 8081")
+                isRunning = true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to start server", e)
+                stopSelf()
+                return START_NOT_STICKY
+            }
+        }
+
+        val mobileIp = getLocalIpAddress()
+        if (mobileIp.isNotEmpty()) {
+            val streamUrl = "http://$mobileIp:8081/stream"
+            val videoName = videoUri?.lastPathSegment ?: "video"
+            pushPlayCommandToTV(tvIp!!, streamUrl, videoName)
+        }
+
+        buildForegroundNotification()
+        return START_STICKY
+    }
+
+    private fun pushPlayCommandToTV(tvIp: String, streamUrl: String, videoName: String) {
+        Thread {
+            try {
+                val url = URL("http://$tvIp:8081/playVideo?url=${Uri.encode(streamUrl)}&name=${Uri.encode(videoName)}")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.connectTimeout = 3000
+                conn.readTimeout = 3000
+                conn.responseCode
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to push play command", e)
+            }
+        }.start()
+    }
+
+    private fun stopStreaming() {
+        val ipToStop = tvIp ?: currentTvIp
+
+        ipToStop?.let { ip ->
+            Thread {
+                try {
+                    val url = URL("http://$ip:8081/stopVideo")
+                    (url.openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 2000
+                        requestMethod = "GET"
+                        responseCode
+                    }
+                } catch (_: Exception) {}
+            }.start()
+        }
+
+        server?.stop()
+        server = null
+        isRunning = false
+        currentTvIp = null
+
+        wakeLock?.let { if (it.isHeld) it.release() }
+        wifiLock?.let { if (it.isHeld) it.release() }
+
+        ServerEventBus.postEvent(ACTION_RESET_REMOTE_UI)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+        stopSelf()
+    }
+
+    override fun onDestroy() {
+        server?.stop()
+        server = null
+        isRunning = false
+        currentTvIp = null
+
+        wakeLock?.let { if (it.isHeld) it.release() }
+        wifiLock?.let { if (it.isHeld) it.release() }
+
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "LFS_SERVER_CHANNEL",
+                "LFS Streaming Service",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+        }
+    }
+
+    private fun getLocalIpAddress(): String {
+        var fallbackIp = ""
+        try {
+            java.net.NetworkInterface.getNetworkInterfaces().toList().forEach { intf ->
+                if (!intf.isUp || intf.isLoopback) return@forEach
+
+                intf.inetAddresses.toList().forEach { addr ->
+                    if (!addr.isLoopbackAddress && addr is java.net.Inet4Address) {
+                        val ip = addr.hostAddress ?: ""
+                        if (ip.startsWith("192.168.") || ip.startsWith("172.") || ip.startsWith("10.")) {
+                            return ip
+                        }
+                        if (fallbackIp.isEmpty()) fallbackIp = ip
+                    }
+                }
+            }
+        } catch (_: Exception) {}
+        return fallbackIp
+    }
+
+    private fun buildForegroundNotification() {
+        val largeIconBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_tv_ico)
+
+        val stopIntent = Intent(this, FileServerService::class.java).apply {
+            action = ACTION_STOP_SERVER
+        }
+        val stopPendingIntent = PendingIntent.getService(
+            this, 0, stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val openIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val openPendingIntent = PendingIntent.getActivity(
+            this, 0, openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notificationBuilder = NotificationCompat.Builder(this, "LFS_SERVER_CHANNEL")
+            .setContentTitle("Streaming to TV \uD83D\uDCFA")
+            .setContentText("Tap STOP to disconnect")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setColor("#1A73E8".toColorInt())
+            .setLargeIcon(largeIconBitmap)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setContentIntent(openPendingIntent)
+            .addAction(android.R.drawable.ic_delete, "STOP STREAM", stopPendingIntent)
+
+        val notification = notificationBuilder.build()
+        notification.flags = notification.flags or
+                android.app.Notification.FLAG_NO_CLEAR or
+                android.app.Notification.FLAG_ONGOING_EVENT
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(1, notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            } else {
+                startForeground(1, notification)
+            }
+        } catch (e: Exception) {
+            startForeground(1, notification)
+        }
+    }
+
+    inner class VideoStreamServer(port: Int) : NanoHTTPD(port) {
+        override fun serve(session: IHTTPSession): Response {
+            val uri = session.uri
+
+            if (uri == "/stop") {
+                mainHandler.post { stopStreaming() }
+                return newFixedLengthResponse("Mobile Server Stopped")
+            }
+
+            if (uri != "/stream") {
+                return newFixedLengthResponse("Mobile Server Ready")
+            }
+
+            val vUri = videoUri ?: return newFixedLengthResponse(
+                Response.Status.NOT_FOUND, "text/plain", "No video"
+            )
+
+            val seekable = openSeekableSource(vUri)
+            if (seekable == null) {
+                return fallbackStreamResponse(vUri)
+            }
+
+            val (fileStream, fileSize) = seekable
+            val channel = fileStream.channel
+            val mimeType = getMimeType(vUri.lastPathSegment ?: "video.mp4")
+
+            val rangeHeader = session.headers["range"]
+            if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
+                val rangeValue = rangeHeader.removePrefix("bytes=")
+                val parts = rangeValue.split("-")
+                val start = parts[0].toLongOrNull() ?: 0
+                val end = if (parts.size > 1 && parts[1].isNotEmpty()) {
+                    parts[1].toLongOrNull() ?: (fileSize - 1)
+                } else {
+                    fileSize - 1
+                }.coerceAtMost(fileSize - 1)
+                val contentLength = end - start + 1
+
+                return try {
+                    // 1. Safe OS Fallback - பழைய போன்களுக்கான பாதுகாப்பு
+                    try {
+                        channel.position(start)
+                    } catch (e: Exception) {
+                        fileStream.skip(start)
+                    }
+
+                    // 2. Safe Buffer - பழைய போன் ஹேங் ஆகாமல் இருக்க 64KB சீரான பஃபர்
+                    val bufferedStream = BufferedInputStream(fileStream, 64 * 1024)
+
+                    val response = newFixedLengthResponse(
+                        Response.Status.PARTIAL_CONTENT, mimeType, bufferedStream, contentLength
+                    )
+                    response.addHeader("Content-Range", "bytes $start-$end/$fileSize")
+                    response.addHeader("Accept-Ranges", "bytes")
+                    response.addHeader("Connection", "keep-alive")
+                    response.addHeader("Access-Control-Allow-Origin", "*")
+                    response
+                } catch (e: Exception) {
+                    newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", e.message ?: "Error")
+                }
+            }
+
+            return try {
+                // Safe OS Fallback for full stream
+                try {
+                    channel.position(0)
+                } catch (e: Exception) {
+                    // Do nothing, stream is at start
+                }
+
+                val bufferedStream = BufferedInputStream(fileStream, 64 * 1024)
+
+                newChunkedResponse(Response.Status.OK, mimeType, bufferedStream).apply {
+                    addHeader("Content-Length", fileSize.toString())
+                    addHeader("Accept-Ranges", "bytes")
+                    addHeader("Connection", "keep-alive")
+                    addHeader("Access-Control-Allow-Origin", "*")
+                }
+            } catch (e: Exception) {
+                newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", e.message ?: "Error")
+            }
+        }
+
+        private fun openSeekableSource(uri: Uri): Pair<FileInputStream, Long>? {
+            try {
+                when (uri.scheme) {
+                    "file" -> {
+                        val file = File(uri.path!!)
+                        if (file.exists()) {
+                            return FileInputStream(file) to file.length()
+                        }
+                    }
+                    "content" -> {
+                        val path = getRealPathFromMediaStore(uri)
+                        if (path != null) {
+                            val file = File(path)
+                            if (file.exists()) {
+                                return FileInputStream(file) to file.length()
+                            }
+                        }
+                        val pfd = contentResolver.openFileDescriptor(uri, "r") ?: return null
+                        val fileSize = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            pfd.statSize
+                        } else {
+                            contentResolver.query(uri, arrayOf(MediaStore.Video.Media.SIZE), null, null, null)?.use { c ->
+                                if (c.moveToFirst()) c.getLong(c.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)) else -1
+                            } ?: -1
+                        }
+                        if (fileSize <= 0) {
+                            pfd.close()
+                            return null
+                        }
+                        val fileStream = FileInputStream(pfd.fileDescriptor)
+                        return fileStream to fileSize
+                    }
+                }
+            } catch (e: Exception) {}
+            return null
+        }
+
+        private fun getRealPathFromMediaStore(uri: Uri): String? {
+            try {
+                val cursor = contentResolver.query(uri, arrayOf(MediaStore.Video.Media.DATA), null, null, null)
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        return it.getString(it.getColumnIndexOrThrow(MediaStore.Video.Media.DATA))
+                    }
+                }
+            } catch (e: Exception) {}
+            return null
+        }
+
+        private fun fallbackStreamResponse(uri: Uri): Response {
+            return try {
+                val inputStream = contentResolver.openInputStream(uri)!!
+                val fileName = uri.lastPathSegment ?: "video.mp4"
+                val mimeType = getMimeType(fileName)
+
+                val bufferedStream = BufferedInputStream(inputStream, 64 * 1024)
+
+                newChunkedResponse(Response.Status.OK, mimeType, bufferedStream).apply {
+                    addHeader("Accept-Ranges", "bytes")
+                    addHeader("Connection", "keep-alive")
+                    addHeader("Access-Control-Allow-Origin", "*")
+                }
+            } catch (e: Exception) {
+                newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", e.message ?: "Error")
+            }
+        }
+
+        // 3. Custom MimeType Dictionary - எல்லா ஃபார்மேட் வீடியோக்களையும் சப்போர்ட் செய்ய
+        private fun getMimeType(fileName: String): String {
+            val extension = MimeTypeMap.getFileExtensionFromUrl(fileName)?.lowercase() ?: ""
+            return when (extension) {
+                "mp4" -> "video/mp4"
+                "mkv" -> "video/x-matroska"
+                "avi" -> "video/x-msvideo"
+                "webm" -> "video/webm"
+                "flv" -> "video/x-flv"
+                "ts" -> "video/mp2t"
+                "3gp" -> "video/3gpp"
+                "mov" -> "video/quicktime"
+                "wmv" -> "video/x-ms-wmv"
+                else -> {
+                    if (extension.isNotEmpty()) {
+                        MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "video/*"
+                    } else "video/*"
+                }
+            }
+        }
+    }
+}
+
+    </textarea>
+
+    <script>
+        document.getElementById('appName').addEventListener('input', function(e) {
+            let name = e.target.value.toLowerCase().trim();
+            let formattedName = name.replace(/[^a-z0-9]/g, '');
+            
+            let packageInput = document.getElementById('packageName');
+            if(formattedName.length > 0) {
+                if(/^[0-9]/.test(formattedName)) {
+                    formattedName = 'app' + formattedName;
+                }
+                packageInput.value = 'com.' + formattedName + '.app';
+            } else {
+                packageInput.value = '';
+            }
+            clearError();
+        });
+
+        document.getElementById('packageName').addEventListener('input', clearError);
+
+        function clearError() {
+            document.getElementById('packageName').classList.remove('error-border');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('outputContainer').style.display = 'none';
+        }
+
+        function isValidPackageName(packageName) {
+            const packageRegex = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+            return packageRegex.test(packageName.toLowerCase());
+        }
+
+        function generateCode() {
+            let appName = document.getElementById('appName').value.trim();
+            let packageName = document.getElementById('packageName').value.trim();
+            let packageInput = document.getElementById('packageName');
+            let errorMsg = document.getElementById('errorMessage');
+
+            if(!appName || !packageName) {
+                alert("Please fill in both App Name and Package Name!");
+                return;
+            }
+
+            if(!isValidPackageName(packageName)) {
+                packageInput.classList.add('error-border');
+                errorMsg.style.display = 'block';
+                document.getElementById('outputContainer').style.display = 'none';
+                return; 
+            }
+
+            packageName = packageName.toLowerCase();
+            let cleanAppName = appName.replace(/\s+/g, '');
+
+            // Get the raw Kotlin code from the hidden textarea
+            let baseKotlin = document.getElementById('rawCodeTemplate').value;
+
+            // Dynamic Replacement Logic
+            let finalCode = baseKotlin
+                .replace(/com\.lfs\.player/g, packageName)
+                .replace(/LFS Streaming Service/g, appName + ' Streaming Service')
+                .replace(/LFSServer/g, cleanAppName + 'Server');
+
+            document.getElementById('codeOutput').textContent = finalCode.trim();
+            document.getElementById('outputContainer').style.display = 'block';
+            document.getElementById('copyBtn').textContent = 'Copy Code';
+        }
+
+        function copyCode() {
+            let code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                let btn = document.getElementById('copyBtn');
+                btn.textContent = 'Copied!';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = 'white';
+                
+                setTimeout(() => {
+                    btn.textContent = 'Copy Code';
+                    btn.style.backgroundColor = 'transparent';
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.color = 'var(--primary)';
+                }, 2500);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                alert("Failed to copy code. Please try manually.");
+            });
+        }
+    </script>
+</body>
+</html>
