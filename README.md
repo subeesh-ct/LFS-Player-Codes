@@ -3,7 +3,7 @@
   
   <h1>📺 LFS Player v1.0</h1>
   
-  <p><b>High-Performance Mobile to TV Streaming Application</b></p>
+  <p><b>High-Performance Mobile to TV Video Casting Application</b></p>
   
   <a href="YOUR_YOUTUBE_VIDEO_LINK"><img src="https://img.shields.io/badge/YouTube-Coding_Theriyuma-red?style=for-the-badge&logo=youtube"></a>
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white">
@@ -14,11 +14,11 @@
 
 ## 📝 About the Project
 
-**LFS Player** is a robust media streaming application meticulously designed to deliver seamless live TV streaming at crisp **1080p resolution**. Engineered with a strict focus on optimization, it ensures a completely lag-free and uninterrupted viewing experience. Built from the ground up using modern mobile development tools, this app is perfect for casting and streaming local/network media directly to TV interfaces.
+**LFS Player** is a robust media casting application meticulously designed to deliver seamless offline video streaming from your mobile directly to your TV. Engineered with a strict focus on optimization, it ensures a completely lag-free and uninterrupted viewing experience. Built from the ground up using modern mobile development tools, this app is perfect for casting your locally downloaded mobile videos to TV interfaces. *(Note: This app does not support Live TV or website video streaming).*
 
 ## ✨ Key Features
 
-* 🚀 **High Performance:** Zero lag during live TV streaming and media casting.
+* 🚀 **High Performance:** Zero lag during local video casting from mobile to TV.
 * 📺 **1080p Resolution:** Crystal clear video playback with hardware acceleration.
 * ⚡ **Easy Setup:** Change the package name and build your custom app in just 2 minutes.
 * 💻 **Tech Stack:** 100% Kotlin, Java & strictly Android Studio compatible.
